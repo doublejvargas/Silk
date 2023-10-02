@@ -113,7 +113,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.261.1\Include;C:\dev\Vulkan\Silk\Dependencies\glfw-3.3.8\include;C:\dev\Vulkan\Silk\Silk\vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\dev\Vulkan\Silk\Silk;C:\VulkanSDK\1.3.261.1\Include;C:\dev\Vulkan\Silk\Dependencies\glfw-3.3.8\include;C:\dev\Vulkan\Silk\Silk\vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -131,7 +131,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.261.1\Include;C:\dev\Vulkan\Silk\Dependencies\glfw-3.3.8\include;C:\dev\Vulkan\Silk\Silk\vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\dev\Vulkan\Silk\Silk;C:\VulkanSDK\1.3.261.1\Include;C:\dev\Vulkan\Silk\Dependencies\glfw-3.3.8\include;C:\dev\Vulkan\Silk\Silk\vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -144,6 +144,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp" />
+    <ClCompile Include="App Manager\AppManager.cpp" />
+    <ClCompile Include="skWindow\skWindow.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="App Manager\AppManager.h" />
+    <ClInclude Include="skWindow\skWindow.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
