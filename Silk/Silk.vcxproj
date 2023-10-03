@@ -145,11 +145,13 @@
   <ItemGroup>
     <ClCompile Include="App.cpp" />
     <ClCompile Include="App Manager\AppManager.cpp" />
+    <ClCompile Include="skDevice.cpp" />
     <ClCompile Include="skPipeline.cpp" />
     <ClCompile Include="skWindow\skWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App Manager\AppManager.h" />
+    <ClInclude Include="skDevice.h" />
     <ClInclude Include="skPipeline.h" />
     <ClInclude Include="skWindow\skWindow.h" />
   </ItemGroup>

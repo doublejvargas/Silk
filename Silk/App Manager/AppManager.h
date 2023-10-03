@@ -2,6 +2,7 @@
 
 #include "skWindow/skWindow.h"
 #include "skPipeline.h"
+#include "skDevice.h"
 
 #include <string>
 
@@ -17,6 +18,11 @@ namespace sk
 
 	private:
 		skWindow m_skWindow{ WIDTH, HEIGHT, "Hello Silk!" };
-		skPipeline m_skPipeline{ "res\\shaders\\bin\\simple_shader.vert.spv", "res\\shaders\\bin\\simple_shader.frag.spv" };
+		skDevice m_skDevice{ m_skWindow };
+		skPipeline m_skPipeline{ 
+			m_skDevice, 
+			"res\\shaders\\bin\\simple_shader.vert.spv", 
+			"res\\shaders\\bin\\simple_shader.frag.spv", 
+			skPipeline::defaultPipelineConfigInfo(WIDTH, HEIGHT) };
 	};
 } // namespace sk

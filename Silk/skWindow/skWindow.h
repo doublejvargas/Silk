@@ -26,6 +26,8 @@ namespace sk
 		skWindow& operator=(const skWindow &) = delete;
 
 		inline bool shouldClose() const { return glfwWindowShouldClose(m_Window); }
+
+		void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
 	};
 
 } //namespace sk

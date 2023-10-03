@@ -1,5 +1,7 @@
 #include "skWindow.h"
+
 #include <cassert>
+#include <stdexcept>
 
 namespace sk
 {
@@ -8,10 +10,20 @@ namespace sk
 		m_InitWindow();
 	}
 
+	
+
 	skWindow::~skWindow()
 	{
 		glfwDestroyWindow(m_Window);
 		glfwTerminate();
+	}
+
+	void skWindow::createWindowSurface(VkInstance instance, VkSurfaceKHR* surface)
+	{
+		if (glfwCreateWindowSurface(instance, m_Window, nullptr, surface) != VK_SUCCESS)
+		{
+			throw std::runtime_error("Failed to create window surface \n");
+		}
 	}
 
 	void skWindow::m_InitWindow()

@@ -6,9 +6,13 @@
 
 namespace sk
 {
-	skPipeline::skPipeline(const std::string& vertFilePath, const std::string& fragFilePath)
+	skPipeline::skPipeline(
+		skDevice& device,
+		const std::string& vertFilePath,
+		const std::string& fragFilePath,
+		const PipelineConfigInfo& configInfo) : m_skDevice{device}
 	{
-		createGraphicsPipeline(vertFilePath, fragFilePath);
+		createGraphicsPipeline(vertFilePath, fragFilePath, configInfo);
 	}
 
 	std::vector<char> skPipeline::readFile(const std::string& filepath)
@@ -29,7 +33,14 @@ namespace sk
 		return buffer;
 	}
 
-	void skPipeline::createGraphicsPipeline(const std::string& vertFilepath, const std::string& fragFilePath)
+	sk::PipelineConfigInfo skPipeline::defaultPipelineConfigInfo(uint32_t width, uint32_t height)
+	{
+		PipelineConfigInfo configInfo{};
+
+		return configInfo;
+	}
+
+	void skPipeline::createGraphicsPipeline(const std::string& vertFilepath, const std::string& fragFilePath, const PipelineConfigInfo& configInfo)
 	{
 		auto vertCode = readFile(vertFilepath);
 		auto fragCode = readFile(fragFilePath);
@@ -37,4 +48,18 @@ namespace sk
 		std::cout << "Vertex Shader code size: " << vertCode.size() << '\n';
 		std::cout << "Fragment Shader code size: " << fragCode.size() << '\n';
 	}
+
+	void skPipeline::createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule)
+	{
+		VkShaderModuleCreateInfo createInfo{};
+		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+		createInfo.codeSize = code.size();
+		createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
+
+		if (vkCreateShaderModule(m_skDevice.device(), &createInfo, nullptr, shaderModule) != VK_SUCCESS)
+		{
+			throw std::runtime_error("Failed to create Shader Module. \n");
+		}
+	}
+
 } // namespace sk
