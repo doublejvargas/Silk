@@ -24,6 +24,9 @@
     <ClCompile Include="App Manager\AppManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="skPipeline.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="skWindow\skWindow.h">
@@ -32,5 +35,13 @@
     <ClInclude Include="App Manager\AppManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="skPipeline.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="compile.bat">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

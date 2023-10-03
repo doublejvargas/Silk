@@ -1,6 +1,9 @@
 #pragma once
 
 #include "skWindow/skWindow.h"
+#include "skPipeline.h"
+
+#include <string>
 
 namespace sk
 {
@@ -14,5 +17,6 @@ namespace sk
 
 	private:
 		skWindow m_skWindow{ WIDTH, HEIGHT, "Hello Silk!" };
+		skPipeline m_skPipeline{ "res\\shaders\\bin\\simple_shader.vert.spv", "res\\shaders\\bin\\simple_shader.frag.spv" };
 	};
 } // namespace sk
