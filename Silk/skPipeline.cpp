@@ -41,6 +41,11 @@ namespace sk
 		return buffer;
 	}
 
+	void skPipeline::bind(VkCommandBuffer commandBuffer)
+	{
+		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
+	}
+
 	sk::PipelineConfigInfo skPipeline::defaultPipelineConfigInfo(uint32_t width, uint32_t height)
 	{
 		PipelineConfigInfo configInfo{};
@@ -192,8 +197,7 @@ namespace sk
 		pipelineInfo.basePipelineIndex = -1;
 		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
-		if (vkCreateGraphicsPipelines(m_skDevice.device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_GraphicsPipeline) != VK_SUCCESS)
-		{
+		if (vkCreateGraphicsPipelines(m_skDevice.device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_GraphicsPipeline) != VK_SUCCESS) {
 			throw std::runtime_error("Failed to create graphics pipeline object \n");
 		}
 
@@ -206,8 +210,7 @@ namespace sk
 		createInfo.codeSize = code.size();
 		createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
-		if (vkCreateShaderModule(m_skDevice.device(), &createInfo, nullptr, shaderModule) != VK_SUCCESS)
-		{
+		if (vkCreateShaderModule(m_skDevice.device(), &createInfo, nullptr, shaderModule) != VK_SUCCESS) {
 			throw std::runtime_error("Failed to create Shader Module. \n");
 		}
 	}

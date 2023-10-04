@@ -52,8 +52,12 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="compile.bat">
+    <None Include="compile_shaders.bat">
       <Filter>Source Files</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="res\shaders\simple_shader.vert" />
+    <CustomBuild Include="res\shaders\simple_shader.frag" />
   </ItemGroup>
 </Project>
