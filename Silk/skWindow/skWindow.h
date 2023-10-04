@@ -26,6 +26,7 @@ namespace sk
 		skWindow& operator=(const skWindow &) = delete;
 
 		inline bool shouldClose() const { return glfwWindowShouldClose(m_Window); }
+		inline VkExtent2D getExtent() const { return { static_cast<uint32_t>(m_Width), static_cast<uint32_t>(m_Height) }; }
 
 		void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
 	};
