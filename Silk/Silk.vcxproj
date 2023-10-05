@@ -185,6 +185,7 @@
   <ItemGroup>
     <ClCompile Include="App.cpp" />
     <ClCompile Include="App Manager\AppManager.cpp" />
+    <ClCompile Include="model\skModel.cpp" />
     <ClCompile Include="skDevice.cpp" />
     <ClCompile Include="skPipeline.cpp" />
     <ClCompile Include="skSwapChain.cpp" />
@@ -192,6 +193,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App Manager\AppManager.h" />
+    <ClInclude Include="model\skModel.h" />
     <ClInclude Include="skDevice.h" />
     <ClInclude Include="skPipeline.h" />
     <ClInclude Include="skSwapChain.h" />

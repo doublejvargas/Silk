@@ -4,6 +4,7 @@
 #include "skPipeline.h"
 #include "skSwapChain.h"
 #include "skDevice.h"
+#include "model/skModel.h"
 
 // std
 #include <memory>
@@ -27,10 +28,14 @@ namespace sk
 		void run();
 
 	private:
+		void loadModels();
 		void createPipelineLayout();
 		void createPipeline();
 		void createCommandBuffers();
 		void drawFrame();
+		
+		// for fun
+		void sierpinski(std::vector<skModel::Vertex>& vertices, int depth, glm::vec2 left, glm::vec2 right, glm::vec2 top);
 
 		skWindow m_skWindow{ WIDTH, HEIGHT, "Hello Silk!" };
 		skDevice m_skDevice{ m_skWindow };
@@ -39,5 +44,6 @@ namespace sk
 		std::unique_ptr<skPipeline> m_skPipeline;
 		VkPipelineLayout m_PipelineLayout;
 		std::vector<VkCommandBuffer> m_CommandBuffers;
+		std::unique_ptr<skModel> m_skModel;
 	};
 } // namespace sk

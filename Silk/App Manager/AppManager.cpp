@@ -8,6 +8,7 @@ namespace sk
 
 	AppManager::AppManager()
 	{
+		loadModels();
 		createPipelineLayout();
 		createPipeline();
 		createCommandBuffers();
@@ -29,6 +30,35 @@ namespace sk
 		}
 
 		vkDeviceWaitIdle(m_skDevice.device());
+	}
+
+	// for fun
+	void AppManager::sierpinski(
+		std::vector<skModel::Vertex>& vertices,
+		int depth,
+		glm::vec2 left,
+		glm::vec2 right,
+		glm::vec2 top) {
+		if (depth <= 0) {
+			vertices.push_back({ top });
+			vertices.push_back({ right });
+			vertices.push_back({ left });
+		}
+		else {
+			auto leftTop = 0.5f * (left + top);
+			auto rightTop = 0.5f * (right + top);
+			auto leftRight = 0.5f * (left + right);
+			sierpinski(vertices, depth - 1, left, leftRight, leftTop);
+			sierpinski(vertices, depth - 1, leftRight, right, rightTop);
+			sierpinski(vertices, depth - 1, leftTop, rightTop, top);
+		}
+	}
+
+	void AppManager::loadModels()
+	{
+		std::vector<skModel::Vertex> vertices {};
+		sierpinski(vertices, 5, {-0.5f, 0.5f}, { 0.5f, 0.5f }, { 0.0f, -0.5f });
+		m_skModel = std::make_unique<skModel>(m_skDevice, vertices);
 	}
 
 	void AppManager::createPipelineLayout()
@@ -107,7 +137,11 @@ namespace sk
 			m_skPipeline->bind(m_CommandBuffers[i]);
 			// 3 vertices, 1 instance, 0 & 0 offsets
 			// instances are used when we want to draw multiple copies of the same vertex data (similar to batch rendering). One application of this is particle systems.
-			vkCmdDraw(m_CommandBuffers[i], 3, 1, 0, 0);
+			//vkCmdDraw(m_CommandBuffers[i], 3, 1, 0, 0);
+
+			//drawing using vertex buffer
+			m_skModel->bind(m_CommandBuffers[i]);
+			m_skModel->draw(m_CommandBuffers[i]);
 
 			vkCmdEndRenderPass(m_CommandBuffers[i]);
 			if (vkEndCommandBuffer(m_CommandBuffers[i]) != VK_SUCCESS) {
