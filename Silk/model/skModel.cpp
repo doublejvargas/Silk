@@ -59,11 +59,16 @@ namespace sk
 
 	std::vector<VkVertexInputAttributeDescription> skModel::Vertex::getAttributeDescriptions()
 	{
-		std::vector<VkVertexInputAttributeDescription> attributeDescriptions(1);
-		attributeDescriptions[0].binding = 0;
-		attributeDescriptions[0].location = 0;
+		std::vector<VkVertexInputAttributeDescription> attributeDescriptions(2);
+		attributeDescriptions[0].binding = 0; // has to do with interleaving attributes in one buffer, or separate buffers for each attribute
+		attributeDescriptions[0].location = 0; // refers to layout location
 		attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
-		attributeDescriptions[0].offset = 0;
+		attributeDescriptions[0].offset = offsetof(Vertex, position); // offset from start of vertex data to attribute (stride is the byte size of a vertex basically, or byte distance to jump from one vertex to the next)
+
+		attributeDescriptions[1].binding = 0; // binding remains as 0 here for color attribute, as we are interleaving attributes in one buffer
+		attributeDescriptions[1].location = 1; // make sure layout here matches with layout location in shader files
+		attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT; //r32g32b32 because of 3 components (vec3) as opposed to location's 2 components (vec2)
+		attributeDescriptions[1].offset = offsetof(Vertex, color); //This calculates byte offset. type as first argument and member name as second argument
 
 		return attributeDescriptions;
 	}

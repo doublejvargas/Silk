@@ -56,8 +56,12 @@ namespace sk
 
 	void AppManager::loadModels()
 	{
-		std::vector<skModel::Vertex> vertices {};
-		sierpinski(vertices, 5, {-0.5f, 0.5f}, { 0.5f, 0.5f }, { 0.0f, -0.5f });
+		std::vector<skModel::Vertex> vertices {
+			{ {0.0f, -0.5f}, {1.0f, 0.0f, 0.0f} },
+			{ {0.5f,  0.5f}, {0.0f, 1.0f, 0.0f} },
+			{ {-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f} }
+		};
+		
 		m_skModel = std::make_unique<skModel>(m_skDevice, vertices);
 	}
 
