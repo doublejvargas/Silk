@@ -23,7 +23,7 @@ namespace sk
 
 		// delete copy constructors because we're managing vulkan objects in this class
 		AppManager(const AppManager&) = delete;
-		AppManager& operator=(const AppManager&) = delete;
+		AppManager &operator=(const AppManager&) = delete;
 
 		void run();
 
@@ -32,18 +32,20 @@ namespace sk
 		void createPipelineLayout();
 		void createPipeline();
 		void createCommandBuffers();
+		void freeCommandBuffers();
 		void drawFrame();
+		void recreateSwapChain();
+		void recordCommandBuffer(int imageIndex);
 		
 		// for fun
 		void sierpinski(std::vector<skModel::Vertex>& vertices, int depth, glm::vec2 left, glm::vec2 right, glm::vec2 top);
 
 		skWindow m_skWindow{ WIDTH, HEIGHT, "Hello Silk!" };
 		skDevice m_skDevice{ m_skWindow };
-		skSwapChain m_skSwapChain{ m_skDevice, m_skWindow.getExtent() };
-
+		std::unique_ptr<skSwapChain> m_skSwapChain;
 		std::unique_ptr<skPipeline> m_skPipeline;
-		VkPipelineLayout m_PipelineLayout;
-		std::vector<VkCommandBuffer> m_CommandBuffers;
+		VkPipelineLayout m_pipelineLayout;
+		std::vector<VkCommandBuffer> m_commandBuffers;
 		std::unique_ptr<skModel> m_skModel;
 	};
 } // namespace sk

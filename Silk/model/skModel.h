@@ -29,7 +29,7 @@ namespace sk
 
 		// delete copy constructors to avoid dangling pointers
 		skModel(const skModel&) = delete;
-		void operator=(const skModel&) = delete;
+		skModel &operator=(const skModel&) = delete;
 
 		void bind(VkCommandBuffer commandBuffer);
 		void draw(VkCommandBuffer commandBuffer);

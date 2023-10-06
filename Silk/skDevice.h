@@ -35,7 +35,7 @@ class skDevice {
 
   // Not copyable or movable
   skDevice(const skDevice &) = delete;
-  void operator=(const skDevice &) = delete;
+  skDevice &operator=(const skDevice &) = delete;
   skDevice(skDevice &&) = delete;
   skDevice &operator=(skDevice &&) = delete;
 

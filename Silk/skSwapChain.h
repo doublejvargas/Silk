@@ -7,6 +7,7 @@
 // std lib headers
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace sk {
 
@@ -14,11 +15,13 @@ class skSwapChain {
  public:
   static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
+  //skSwapChain() = default;
   skSwapChain(skDevice &deviceRef, VkExtent2D windowExtent);
+  skSwapChain(skDevice& deviceRef, VkExtent2D windowExtent, std::shared_ptr<skSwapChain> previous);
   ~skSwapChain();
 
   skSwapChain(const skSwapChain &) = delete;
-  void operator=(const skSwapChain &) = delete;
+  skSwapChain &operator=(const skSwapChain &) = delete;
 
   VkFramebuffer getFrameBuffer(int index) { return swapChainFramebuffers[index]; }
   VkRenderPass getRenderPass() { return renderPass; }
@@ -38,6 +41,7 @@ class skSwapChain {
   VkResult submitCommandBuffers(const VkCommandBuffer *buffers, uint32_t *imageIndex);
 
  private:
+  void Init();
   void createSwapChain();
   void createImageViews();
   void createDepthResources();
@@ -68,6 +72,7 @@ class skSwapChain {
   VkExtent2D windowExtent;
 
   VkSwapchainKHR swapChain;
+  std::shared_ptr<skSwapChain> oldSwapChain;
 
   std::vector<VkSemaphore> imageAvailableSemaphores;
   std::vector<VkSemaphore> renderFinishedSemaphores;
