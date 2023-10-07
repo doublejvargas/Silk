@@ -1,10 +1,25 @@
 #include "AppManager.h"
 
+// libs
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <glm/glm.hpp>
+
+// std
 #include <stdexcept>
 #include <array>
+#include <iostream>
 
 namespace sk
-{
+{	
+	// temp, will be deleted later
+	struct SimplePushConstantData {
+		glm::vec2 offset;
+		// this is required by the SPIR-V explicit layout validation rules
+		// vec3s and vec4s must be aligned to a multiple of 4N where N is the size of the component literal (in this case, it is a scalar float -> N = 4 bytes)
+		//   therefore, vec2 -> 2N = 8 bytes and vec3 -> 4N = 16 bytes, thus the alignas(16)
+		alignas(16) glm::vec3 color;
+	};
 
 	AppManager::AppManager()
 	{
@@ -23,6 +38,8 @@ namespace sk
 
 	void AppManager::run()
 	{
+
+		std::cout << "maxPushConstantSize = " << m_skDevice.properties.limits.maxPushConstantsSize << std::endl;
 		while (!m_skWindow.shouldClose())
 		{
 			glfwPollEvents();
@@ -67,12 +84,17 @@ namespace sk
 
 	void AppManager::createPipelineLayout()
 	{
+		VkPushConstantRange pushConstantRange{};
+		pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+		pushConstantRange.offset = 0;
+		pushConstantRange.size = sizeof(SimplePushConstantData);
+
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 		pipelineLayoutInfo.setLayoutCount = 0;
 		pipelineLayoutInfo.pSetLayouts = nullptr;
-		pipelineLayoutInfo.pushConstantRangeCount = 0;
-		pipelineLayoutInfo.pPushConstantRanges = nullptr;
+		pipelineLayoutInfo.pushConstantRangeCount = 1;
+		pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 		if (vkCreatePipelineLayout(m_skDevice.device(), &pipelineLayoutInfo, nullptr, &m_pipelineLayout) != VK_SUCCESS) {
 			throw std::runtime_error("Failed to create pipeline object. \n");
 		}
@@ -151,6 +173,9 @@ namespace sk
 
 	void AppManager::recordCommandBuffer(int imageIndex)
 	{
+		static int frame = 0;
+		frame = (frame + 1) % 100; // animation will loop every 1000 frames
+
 		VkCommandBufferBeginInfo beginInfo{};
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
@@ -168,7 +193,7 @@ namespace sk
 		renderPassInfo.renderArea.extent = m_skSwapChain->getSwapChainExtent();
 
 		std::array<VkClearValue, 2> clearValues{};
-		clearValues[0].color = { 0.1f, 0.1f, 0.1f, 1.0f };
+		clearValues[0].color = { 0.01f, 0.01f, 0.01f, 1.0f };
 		//clearValues[0].depthStencil = { 1.0f, 0 }; would be ignored because in our renderpass, we structured attachments to framebuffer such that index 0 = color attachment and index 1 = depth attachment 
 		clearValues[1].depthStencil = { 1.0f, 0 };
 		renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
@@ -197,7 +222,25 @@ namespace sk
 
 		//drawing using vertex buffer
 		m_skModel->bind(m_commandBuffers[imageIndex]);
-		m_skModel->draw(m_commandBuffers[imageIndex]);
+
+		//before calling draw, push constants
+		
+		for (int j = 0; j < 4; j++)
+		{
+			SimplePushConstantData push{};
+			push.offset = { -0.5f + frame * 0.02f, -0.4f + j * 0.25f };
+			push.color = { 0.0f, 0.0f, 0.2f + 0.2f * j };
+
+			vkCmdPushConstants(
+				m_commandBuffers[imageIndex],
+				m_pipelineLayout,
+				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+				0,
+				sizeof(SimplePushConstantData),
+				&push);
+
+			m_skModel->draw(m_commandBuffers[imageIndex]);
+		}
 
 		vkCmdEndRenderPass(m_commandBuffers[imageIndex]);
 		if (vkEndCommandBuffer(m_commandBuffers[imageIndex]) != VK_SUCCESS) {
