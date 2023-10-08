@@ -26,6 +26,7 @@ namespace sk
 
 	void skModel::draw(VkCommandBuffer commandBuffer)
 	{
+		// args: vkCmdDraw(commandBuffer, vertexCount, instanceCount, firstVertex, firstInstance)
 		vkCmdDraw(commandBuffer, m_vertexCount, 1, 0, 0);
 	}
 

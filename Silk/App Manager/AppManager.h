@@ -5,6 +5,7 @@
 #include "skSwapChain.h"
 #include "skDevice.h"
 #include "model/skModel.h"
+#include "skGameObject.h"
 
 // std
 #include <memory>
@@ -28,7 +29,7 @@ namespace sk
 		void run();
 
 	private:
-		void loadModels();
+		void loadGameObjects();
 		void createPipelineLayout();
 		void createPipeline();
 		void createCommandBuffers();
@@ -36,6 +37,7 @@ namespace sk
 		void drawFrame();
 		void recreateSwapChain();
 		void recordCommandBuffer(int imageIndex);
+		void renderGameObjects(VkCommandBuffer commandBuffer);
 		
 		// for fun
 		void sierpinski(std::vector<skModel::Vertex>& vertices, int depth, glm::vec2 left, glm::vec2 right, glm::vec2 top);
@@ -46,6 +48,6 @@ namespace sk
 		std::unique_ptr<skPipeline> m_skPipeline;
 		VkPipelineLayout m_pipelineLayout;
 		std::vector<VkCommandBuffer> m_commandBuffers;
-		std::unique_ptr<skModel> m_skModel;
+		std::vector<skGameObject> m_gameObjects;
 	};
 } // namespace sk

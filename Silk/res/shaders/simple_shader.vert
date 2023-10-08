@@ -8,12 +8,13 @@ layout(location = 1) in vec3 a_Color;
 //the name of the uniform doesn't have to match the name of the struct
 layout (push_constant) uniform Push
 { 
+	mat2 transform;
 	vec2 offset; // the order of the fields MUST match the order of the struct we created (see SimplePushConstantData in AppManager.cpp)
 	vec3 color;
 } push;
 
 void main()
 {
-	gl_Position = vec4(a_Position + push.offset, 0.0, 1.0);
+	gl_Position = vec4(push.transform * a_Position + push.offset, 0.0, 1.0);
 	//o_fragColor = a_Color;
 }

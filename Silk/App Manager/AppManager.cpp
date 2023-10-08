@@ -4,6 +4,7 @@
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
+#include <glm/gtc/constants.hpp>
 
 // std
 #include <stdexcept>
@@ -14,6 +15,7 @@ namespace sk
 {	
 	// temp, will be deleted later
 	struct SimplePushConstantData {
+		glm::mat2 transform{ 1.f }; // initialized main diagonal to 1.0f, i.e., an identity matrix
 		glm::vec2 offset;
 		// this is required by the SPIR-V explicit layout validation rules
 		// vec3s and vec4s must be aligned to a multiple of 4N where N is the size of the component literal (in this case, it is a scalar float -> N = 4 bytes)
@@ -23,7 +25,7 @@ namespace sk
 
 	AppManager::AppManager()
 	{
-		loadModels();
+		loadGameObjects();
 		createPipelineLayout();
 		recreateSwapChain();
 		createCommandBuffers();
@@ -71,7 +73,7 @@ namespace sk
 		}
 	}
 
-	void AppManager::loadModels()
+	void AppManager::loadGameObjects()
 	{
 		std::vector<skModel::Vertex> vertices {
 			{ {0.0f, -0.5f}, {1.0f, 0.0f, 0.0f} },
@@ -79,7 +81,29 @@ namespace sk
 			{ {-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f} }
 		};
 		
-		m_skModel = std::make_unique<skModel>(m_skDevice, vertices);
+		auto model = std::make_shared<skModel>(m_skDevice, vertices);
+
+		std::vector<glm::vec3> colors{
+			{1.f, .7f, .73f},
+			{1.f, .87f, .73f},
+			{1.f, 1.f, .73f},
+			{.73f, 1.f, .8f},
+			{.73, .88f, 1.f}  //
+		};
+		for (auto& color : colors) {
+			color = glm::pow(color, glm::vec3{ 2.2f });
+		}
+		for (int i = 0; i < 40; i++) {
+			auto triangle = skGameObject::createGameObject();
+			triangle.model = model;
+			triangle.transform2D.scale = glm::vec2(.5f) + i * 0.025f;
+			triangle.transform2D.rotation = i * glm::pi<float>() * .025f;
+			triangle.color = colors[i % colors.size()];
+			// usage of std::move here to "copy" (shallow copy) triangle into vector m_gameObjects implies triangle is "cannibalized" or emptied/set to point to nullptr etc
+			//  which in turn means triangles will be deleted. This is supposed to be better than ordinarily copying the object.
+			//    the correct technical term is that move "transfers the resources" from triangle.
+			m_gameObjects.push_back(std::move(triangle));
+		}
 	}
 
 	void AppManager::createPipelineLayout()
@@ -173,9 +197,6 @@ namespace sk
 
 	void AppManager::recordCommandBuffer(int imageIndex)
 	{
-		static int frame = 0;
-		frame = (frame + 1) % 100; // animation will loop every 1000 frames
-
 		VkCommandBufferBeginInfo beginInfo{};
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
@@ -220,31 +241,46 @@ namespace sk
 		// instances are used when we want to draw multiple copies of the same vertex data (similar to batch rendering). One application of this is particle systems.
 		//vkCmdDraw(m_CommandBuffers[i], 3, 1, 0, 0);
 
-		//drawing using vertex buffer
-		m_skModel->bind(m_commandBuffers[imageIndex]);
+		//drawing using vertex buffer (this function also loads uniform variables)
+		renderGameObjects(m_commandBuffers[imageIndex]);
 
-		//before calling draw, push constants
-		
-		for (int j = 0; j < 4; j++)
+		vkCmdEndRenderPass(m_commandBuffers[imageIndex]);
+		if (vkEndCommandBuffer(m_commandBuffers[imageIndex]) != VK_SUCCESS) {
+			throw std::runtime_error("Failed to record command buffer.\n");
+		}
+	}
+
+	void AppManager::renderGameObjects(VkCommandBuffer commandBuffer)
+	{
+		// update
+		int i = 0;
+		for (auto& obj : m_gameObjects) {
+			i += 1;
+			obj.transform2D.rotation =
+				glm::mod<float>(obj.transform2D.rotation + 0.001f * i, 2.f * glm::pi<float>());
+		}
+
+		// render
+		m_skPipeline->bind(commandBuffer);
+		for (auto& obj : m_gameObjects)
 		{
+			// push constants (uniforms) before issuing draw call
 			SimplePushConstantData push{};
-			push.offset = { -0.5f + frame * 0.02f, -0.4f + j * 0.25f };
-			push.color = { 0.0f, 0.0f, 0.2f + 0.2f * j };
+			push.offset = obj.transform2D.translation;
+			push.color = obj.color;
+			push.transform = obj.transform2D.mat2(); // returns identity matrix for now
 
 			vkCmdPushConstants(
-				m_commandBuffers[imageIndex],
+				commandBuffer,
 				m_pipelineLayout,
 				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
 				0,
 				sizeof(SimplePushConstantData),
 				&push);
-
-			m_skModel->draw(m_commandBuffers[imageIndex]);
-		}
-
-		vkCmdEndRenderPass(m_commandBuffers[imageIndex]);
-		if (vkEndCommandBuffer(m_commandBuffers[imageIndex]) != VK_SUCCESS) {
-			throw std::runtime_error("Failed to record command buffer.\n");
+				
+			//bind model and draw
+			obj.model->bind(commandBuffer);
+			obj.model->draw(commandBuffer);
 		}
 	}
 
