@@ -13,10 +13,9 @@
 
 namespace sk
 {
-	// temp, will be deleted later
 	struct SimplePushConstantData {
-		glm::mat2 transform{ 1.f }; // initialized main diagonal to 1.0f, i.e., an identity matrix
-		glm::vec2 offset;
+		glm::mat4 transform{ 1.f }; // initialized main diagonal to 1.0f, i.e., an identity matrix
+
 		// this is required by the SPIR-V explicit layout validation rules
 		// vec3s and vec4s must be aligned to a multiple of 4N where N is the size of the component literal (in this case, it is a scalar float -> N = 4 bytes)
 		//   therefore, vec2 -> 2N = 8 bytes and vec3 -> 4N = 16 bytes, thus the alignas(16)
@@ -68,23 +67,24 @@ namespace sk
 
 	void SimpleRenderSystem::renderGameObjects(VkCommandBuffer commandBuffer, std::vector<skGameObject> &gameObjects)
 	{
-		// update
+		// update (akin to onUpdate function)
 		int i = 0;
 		for (auto& obj : gameObjects) {
 			i += 1;
-			obj.transform2D.rotation =
-				glm::mod<float>(obj.transform2D.rotation + 0.001f * i, 2.f * glm::pi<float>());
+			obj.transform.rotation.y =
+				glm::mod<float>(obj.transform.rotation.y + 0.01f * i, 2.f * glm::pi<float>());
+			obj.transform.rotation.x =
+				glm::mod<float>(obj.transform.rotation.x + 0.005f * i, 2.f * glm::pi<float>());
 		}
 
-		// render
+		// render (akin to onRender)
 		m_skPipeline->bind(commandBuffer);
 		for (auto& obj : gameObjects)
 		{
 			// push constants (uniforms) before issuing draw call
 			SimplePushConstantData push{};
-			push.offset = obj.transform2D.translation;
 			push.color = obj.color;
-			push.transform = obj.transform2D.mat2(); // returns identity matrix for now
+			push.transform = obj.transform.mat4(); // returns transformation of this object
 
 			vkCmdPushConstants(
 				commandBuffer,
