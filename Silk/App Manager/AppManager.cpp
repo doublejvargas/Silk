@@ -1,5 +1,6 @@
 #include "AppManager.h"
 #include "renderer/SimpleRenderSystem.h"
+#include "camera/skCamera.h"
 
 // libs
 #define GLM_FORCE_RADIANS
@@ -24,11 +25,18 @@ namespace sk
 	void AppManager::run()
 	{
 		SimpleRenderSystem simpleRenderSystem{ m_skDevice, m_skRenderer.getSwapChainRenderPass() };
+		skCamera camera{};
+		
 
 		std::cout << "maxPushConstantSize = " << m_skDevice.properties.limits.maxPushConstantsSize << std::endl;
 		while (!m_skWindow.shouldClose())
 		{
 			glfwPollEvents();
+
+			float aspect = m_skRenderer.getAspectRatio();
+			//camera.setOrthographicProjection(-aspect, aspect, -1, 1, -1, 1);
+			camera.setPerspectiveProjection(glm::radians(50.f), aspect, .1f, 10.f);
+
 			if (auto commandBuffer = m_skRenderer.beginFrame()) // beginFrame() will return a nullptr if the swapchain needs to be created
 			{
 				/*
@@ -36,7 +44,7 @@ namespace sk
 				*  integrate multiple renderpasses for things such as reflections, shadows and post-processing effects.
 				*/
 				m_skRenderer.beginSwapChainRenderPass(commandBuffer);
-				simpleRenderSystem.renderGameObjects(commandBuffer, m_gameObjects);
+				simpleRenderSystem.renderGameObjects(commandBuffer, m_gameObjects, camera);
 				m_skRenderer.endSwapChainRenderPass(commandBuffer);
 				m_skRenderer.endFrame();
 			}
@@ -109,7 +117,7 @@ namespace sk
 		std::shared_ptr<skModel> model = createCubeModel(m_skDevice, { .0f, .0f, .0f });
 		auto cube = skGameObject::createGameObject();
 		cube.model = model;
-		cube.transform.translation = { .0f, .0f, .5f };
+		cube.transform.translation = { .0f, .0f, 2.5f };
 		cube.transform.scale = { .5f, .5f, .5f };
 		m_gameObjects.push_back(std::move(cube));
 	}

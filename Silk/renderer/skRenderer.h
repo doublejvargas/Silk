@@ -29,6 +29,7 @@ namespace sk
 
 		// getters
 		inline VkRenderPass getSwapChainRenderPass() const { return m_skSwapChain->getRenderPass(); }
+		inline float getAspectRatio() const { return m_skSwapChain->extentAspectRatio(); }
 		inline bool isFrameInProgress() const { return m_isFrameStarted; }
 		inline int getFrameIndex() const {
 			assert(m_isFrameStarted && "Cannot get frame index when frame not in progress.\n");

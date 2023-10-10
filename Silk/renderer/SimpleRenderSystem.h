@@ -4,6 +4,7 @@
 #include "skDevice.h"
 #include "model/skModel.h"
 #include "skGameObject.h"
+#include "camera/skCamera.h"
 
 // std
 #include <memory>
@@ -21,7 +22,7 @@ namespace sk
 		SimpleRenderSystem(const SimpleRenderSystem&) = delete;
 		SimpleRenderSystem& operator=(const SimpleRenderSystem&) = delete;
 
-		void renderGameObjects(VkCommandBuffer commandBuffer, std::vector<skGameObject> &gameObjects);
+		void renderGameObjects(VkCommandBuffer commandBuffer, std::vector<skGameObject> &gameObjects, const skCamera &camera);
 
 
 	private:

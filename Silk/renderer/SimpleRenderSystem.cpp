@@ -65,7 +65,7 @@ namespace sk
 			pipelineConfig);
 	}
 
-	void SimpleRenderSystem::renderGameObjects(VkCommandBuffer commandBuffer, std::vector<skGameObject> &gameObjects)
+	void SimpleRenderSystem::renderGameObjects(VkCommandBuffer commandBuffer, std::vector<skGameObject> &gameObjects, const skCamera& camera)
 	{
 		// update (akin to onUpdate function)
 		int i = 0;
@@ -84,7 +84,7 @@ namespace sk
 			// push constants (uniforms) before issuing draw call
 			SimplePushConstantData push{};
 			push.color = obj.color;
-			push.transform = obj.transform.mat4(); // returns transformation of this object
+			push.transform = camera.getProjection() * obj.transform.mat4(); // returns transformation of this object
 
 			vkCmdPushConstants(
 				commandBuffer,
