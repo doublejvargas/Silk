@@ -67,24 +67,23 @@ namespace sk
 
 	void SimpleRenderSystem::renderGameObjects(VkCommandBuffer commandBuffer, std::vector<skGameObject> &gameObjects, const skCamera& camera)
 	{
-		// update (akin to onUpdate function)
-		int i = 0;
-		for (auto& obj : gameObjects) {
-			i += 1;
-			obj.transform.rotation.y =
-				glm::mod<float>(obj.transform.rotation.y + 0.01f * i, 2.f * glm::pi<float>());
-			obj.transform.rotation.x =
-				glm::mod<float>(obj.transform.rotation.x + 0.005f * i, 2.f * glm::pi<float>());
-		}
-
-		// render (akin to onRender)
+		// do not forget to bind the pipeline!
 		m_skPipeline->bind(commandBuffer);
-		for (auto& obj : gameObjects)
-		{
+
+		auto projectionView = camera.getProjection() * camera.getView();
+
+		// update (akin to onUpdate function)
+		for (auto& obj : gameObjects) {
+			obj.transform.rotation.y =
+				glm::mod(obj.transform.rotation.y + 0.01f, glm::two_pi<float>());
+			obj.transform.rotation.x =
+				glm::mod(obj.transform.rotation.y + 0.005f, glm::two_pi<float>());
+
+			// render (akin to onRender)
 			// push constants (uniforms) before issuing draw call
 			SimplePushConstantData push{};
 			push.color = obj.color;
-			push.transform = camera.getProjection() * obj.transform.mat4(); // returns transformation of this object
+			push.transform = projectionView * obj.transform.mat4(); // returns transformation of this object
 
 			vkCmdPushConstants(
 				commandBuffer,

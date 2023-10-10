@@ -27,3 +27,62 @@ void sk::skCamera::setPerspectiveProjection(float fovy, float aspect, float near
 	m_projectionMatrix[3][2] = -(far * near) / (far - near);
 }
 
+// We can think of this operation as a rotation of the view frustum or camera in the direction that we want to look at,
+//   and then translating the space back to the camera's initial origin.
+//   intuitively, this would be the "moving the objects into the frustum" concept, as opposed to the natural way of thinking of
+//   "moving the frustum to the objects that we want to look at".
+//    So, the operation consists of 1. rotating the space in the direction the camera would look, and 2. translating the space back to the camera's origin.
+void sk::skCamera::setViewDirection(glm::vec3 position, glm::vec3 direction, glm::vec3 up)
+{
+	// orthonormal basis to construct a rotation matrix
+	const glm::vec3 w{ glm::normalize(direction) };
+	const glm::vec3 u{ glm::normalize(glm::cross(w, up)) };
+	const glm::vec3 v{ glm::cross(w, u) };
+
+	m_viewMatrix = glm::mat4{ 1.f };
+	m_viewMatrix[0][0] = u.x;
+	m_viewMatrix[1][0] = u.y;
+	m_viewMatrix[2][0] = u.z;
+	m_viewMatrix[0][1] = v.x;
+	m_viewMatrix[1][1] = v.y;
+	m_viewMatrix[2][1] = v.z;
+	m_viewMatrix[0][2] = w.x;
+	m_viewMatrix[1][2] = w.y;
+	m_viewMatrix[2][2] = w.z;
+	// then, combine the rotation matrix with a translation matrix
+	m_viewMatrix[3][0] = -glm::dot(u, position);
+	m_viewMatrix[3][1] = -glm::dot(v, position);
+	m_viewMatrix[3][2] = -glm::dot(w, position);
+}
+
+void sk::skCamera::setViewTarget(glm::vec3 position, glm::vec3 target, glm::vec3 up)
+{
+	setViewDirection(position, target - position, up);
+}
+
+void sk::skCamera::setViewYXZ(glm::vec3 position, glm::vec3 rotation)
+{
+	const float c3 = glm::cos(rotation.z);
+	const float s3 = glm::sin(rotation.z);
+	const float c2 = glm::cos(rotation.x);
+	const float s2 = glm::sin(rotation.x);
+	const float c1 = glm::cos(rotation.y);
+	const float s1 = glm::sin(rotation.y);
+	const glm::vec3 u{ (c1 * c3 + s1 * s2 * s3), (c2 * s3), (c1 * s2 * s3 - c3 * s1) };
+	const glm::vec3 v{ (c3 * s1 * s2 - c1 * s3), (c2 * c3), (c1 * c3 * s2 + s1 * s3) };
+	const glm::vec3 w{ (c2 * s1), (-s2), (c1 * c2) };
+	m_viewMatrix = glm::mat4{ 1.f };
+	m_viewMatrix[0][0] = u.x;
+	m_viewMatrix[1][0] = u.y;
+	m_viewMatrix[2][0] = u.z;
+	m_viewMatrix[0][1] = v.x;
+	m_viewMatrix[1][1] = v.y;
+	m_viewMatrix[2][1] = v.z;
+	m_viewMatrix[0][2] = w.x;
+	m_viewMatrix[1][2] = w.y;
+	m_viewMatrix[2][2] = w.z;
+	m_viewMatrix[3][0] = -glm::dot(u, position);
+	m_viewMatrix[3][1] = -glm::dot(v, position);
+	m_viewMatrix[3][2] = -glm::dot(w, position);
+}
+
