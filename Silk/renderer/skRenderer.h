@@ -1,8 +1,8 @@
 #pragma once
 
-#include "skWindow/skWindow.h"
-#include "skSwapChain.h"
-#include "skDevice.h"
+#include "window/skWindow.h"
+#include "core/skSwapChain.h"
+#include "core/skDevice.h"
 #include "model/skModel.h"
 
 // std

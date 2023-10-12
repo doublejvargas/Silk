@@ -74,12 +74,6 @@ namespace sk
 
 		// update (akin to onUpdate function)
 		for (auto& obj : gameObjects) {
-			obj.transform.rotation.y =
-				glm::mod(obj.transform.rotation.y + 0.01f, glm::two_pi<float>());
-			obj.transform.rotation.x =
-				glm::mod(obj.transform.rotation.y + 0.005f, glm::two_pi<float>());
-
-			// render (akin to onRender)
 			// push constants (uniforms) before issuing draw call
 			SimplePushConstantData push{};
 			push.color = obj.color;

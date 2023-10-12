@@ -1,7 +1,7 @@
 #pragma once
 
-#include "skPipeline.h"
-#include "skDevice.h"
+#include "core/skPipeline.h"
+#include "core/skDevice.h"
 #include "model/skModel.h"
 #include "skGameObject.h"
 #include "camera/skCamera.h"

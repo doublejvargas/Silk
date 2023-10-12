@@ -1,8 +1,8 @@
 #pragma once
 
-#include "skWindow/skWindow.h"
+#include "window/skWindow.h"
 #include "renderer/skRenderer.h"
-#include "skDevice.h"
+#include "core/skDevice.h"
 #include "skGameObject.h"
 
 // std

@@ -17,7 +17,7 @@ namespace sk
 		void setViewYXZ(glm::vec3 position, glm::vec3 rotation);
 
 		inline const glm::mat4 &getProjection() const { return m_projectionMatrix; }
-		inline const glm::mat4& getView() const { return m_viewMatrix; }
+		inline const glm::mat4 &getView() const { return m_viewMatrix; }
 
 	private:
 		glm::mat4 m_projectionMatrix{ 1.f };

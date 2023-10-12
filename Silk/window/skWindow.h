@@ -32,6 +32,7 @@ namespace sk
 		inline VkExtent2D getExtent() const { return { static_cast<uint32_t>(m_Width), static_cast<uint32_t>(m_Height) }; }
 		inline bool wasWindowResized() const { return m_frameBufferResized; }
 		inline void resetWindowResizedFlag() { m_frameBufferResized = false; }
+		inline GLFWwindow *getGLFWwindow() const { return m_Window; }
 
 		void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
 	};

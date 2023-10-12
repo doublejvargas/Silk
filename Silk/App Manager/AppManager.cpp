@@ -1,6 +1,7 @@
 #include "AppManager.h"
 #include "renderer/SimpleRenderSystem.h"
 #include "camera/skCamera.h"
+#include "controller/KeyboardMovementController.h"
 
 // libs
 #define GLM_FORCE_RADIANS
@@ -9,9 +10,10 @@
 #include <glm/gtc/constants.hpp>
 
 // std
-#include <stdexcept>
 #include <array>
+#include <chrono>
 #include <iostream>
+#include <stdexcept>
 
 namespace sk
 {	
@@ -26,16 +28,28 @@ namespace sk
 	{
 		SimpleRenderSystem simpleRenderSystem{ m_skDevice, m_skRenderer.getSwapChainRenderPass() };
 		skCamera camera{};
-		//camera.setViewDirection(glm::vec3(0.f), glm::vec3(0.5f, 0.f, 1.f));
 		camera.setViewTarget(glm::vec3(-1.f, -2.f, 2.f), glm::vec3(0.f, 0.f, 2.5f));
+
+		auto viewerObject = skGameObject::createGameObject();
+		KeyboardMovementController cameraController{};
+
+		auto currentTime = std::chrono::high_resolution_clock::now();
 
 		std::cout << "maxPushConstantSize = " << m_skDevice.properties.limits.maxPushConstantsSize << std::endl;
 		while (!m_skWindow.shouldClose())
 		{
 			glfwPollEvents();
 
+			auto newTime = std::chrono::high_resolution_clock::now();
+			float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
+			currentTime = newTime;
+			
+			//frameTime = glm::min(frameTime, MAX_FRAME_TIME);
+
+			cameraController.moveInPlaneXZ(m_skWindow.getGLFWwindow(), frameTime, viewerObject);
+			camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
+
 			float aspect = m_skRenderer.getAspectRatio();
-			//camera.setOrthographicProjection(-aspect, aspect, -1, 1, -1, 1);
 			camera.setPerspectiveProjection(glm::radians(50.f), aspect, .1f, 10.f);
 
 			if (auto commandBuffer = m_skRenderer.beginFrame()) // beginFrame() will return a nullptr if the swapchain needs to be created

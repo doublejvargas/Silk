@@ -1,6 +1,6 @@
 #pragma once
 
-#include "skWindow\skWindow.h"
+#include "window\skWindow.h"
 
 // std lib headers
 #include <string>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "skDevice.h"
+#include "core/skDevice.h"
 
 // libs
 #define GLM_FORCE_RADIANS
