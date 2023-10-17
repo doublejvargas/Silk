@@ -8,6 +8,7 @@
 #include <glm/glm.hpp>
 
 // std
+#include <memory>
 #include <vector>
 
 namespace sk
@@ -17,17 +18,25 @@ namespace sk
 	public:
 
 		struct Vertex {
-			glm::vec3 position;
-			glm::vec3 color;
+			glm::vec3 position{};
+			glm::vec3 color{};
+			glm::vec3 normal{};
+			glm::vec2 uv{};
 
 			static std::vector<VkVertexInputBindingDescription> getBindingDescriptions();
 			static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions();
+
+			bool operator==(const Vertex &other) const {
+				return position == other.position && color == other.color && normal == other.normal && uv == other.uv;
+			}
 		};
 
 		// temporary helper object to hold vertices and indices of models
 		struct Builder {
 			std::vector<Vertex> vertices{};
 			std::vector<uint32_t> indices{};
+
+			void loadModel(const std::string& filepath);
 		};
 
 		skModel(skDevice &device, const skModel::Builder &builder);
@@ -39,6 +48,8 @@ namespace sk
 
 		void bind(VkCommandBuffer commandBuffer);
 		void draw(VkCommandBuffer commandBuffer);
+
+		static std::unique_ptr<skModel> createModelFromFile(skDevice& device, const std::string& filepath);
 
 	private:
 		void createVertexBuffers(const std::vector<Vertex>& vertices);

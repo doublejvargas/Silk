@@ -83,6 +83,12 @@
     <ClInclude Include="controller\KeyboardMovementController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="vendor\tol\tiny_obj_loader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="skUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="compile_shaders.bat">
