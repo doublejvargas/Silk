@@ -24,7 +24,13 @@ namespace sk
 			static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions();
 		};
 
-		skModel(skDevice &device, const std::vector<Vertex> &vertices);
+		// temporary helper object to hold vertices and indices of models
+		struct Builder {
+			std::vector<Vertex> vertices{};
+			std::vector<uint32_t> indices{};
+		};
+
+		skModel(skDevice &device, const skModel::Builder &builder);
 		~skModel();
 
 		// delete copy constructors to avoid dangling pointers
@@ -36,10 +42,17 @@ namespace sk
 
 	private:
 		void createVertexBuffers(const std::vector<Vertex>& vertices);
+		void createIndexBuffers(const std::vector<uint32_t>& indices);
 
 		skDevice &m_skDevice;
+
 		VkBuffer m_vertexBuffer;
 		VkDeviceMemory m_vertexBufferMemory;
 		uint32_t m_vertexCount;
+
+		bool m_hasIndexBuffer = false;
+		VkBuffer m_indexBuffer;
+		VkDeviceMemory m_indexBufferMemory;
+		uint32_t m_indexCount;
 	};
 } // namespace sk
