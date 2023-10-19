@@ -187,6 +187,7 @@
     <ClCompile Include="App Manager\AppManager.cpp" />
     <ClCompile Include="camera\skCamera.cpp" />
     <ClCompile Include="controller\KeyboardMovementController.cpp" />
+    <ClCompile Include="model\skBuffer.cpp" />
     <ClCompile Include="model\skModel.cpp" />
     <ClCompile Include="renderer\SimpleRenderSystem.cpp" />
     <ClCompile Include="renderer\skRenderer.cpp" />
@@ -200,8 +201,10 @@
     <ClInclude Include="App Manager\AppManager.h" />
     <ClInclude Include="camera\skCamera.h" />
     <ClInclude Include="controller\KeyboardMovementController.h" />
+    <ClInclude Include="model\skBuffer.h" />
     <ClInclude Include="model\skModel.h" />
     <ClInclude Include="renderer\SimpleRenderSystem.h" />
+    <ClInclude Include="renderer\skFrameInfo.h" />
     <ClInclude Include="renderer\skRenderer.h" />
     <ClInclude Include="core\skDevice.h" />
     <ClInclude Include="skGameObject.h" />

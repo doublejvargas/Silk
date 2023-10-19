@@ -1,10 +1,11 @@
-#pragma once
+ #pragma once
 
 #include "core/skPipeline.h"
 #include "core/skDevice.h"
 #include "model/skModel.h"
 #include "skGameObject.h"
 #include "camera/skCamera.h"
+#include "renderer/skFrameInfo.h"
 
 // std
 #include <memory>
@@ -22,7 +23,7 @@ namespace sk
 		SimpleRenderSystem(const SimpleRenderSystem&) = delete;
 		SimpleRenderSystem& operator=(const SimpleRenderSystem&) = delete;
 
-		void renderGameObjects(VkCommandBuffer commandBuffer, std::vector<skGameObject> &gameObjects, const skCamera &camera);
+		void renderGameObjects(FrameInfo &frameInfo, std::vector<skGameObject> &gameObjects);
 
 
 	private:

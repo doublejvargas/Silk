@@ -34,21 +34,11 @@ namespace sk
 		createIndexBuffers(builder.indices);
 	}
 
-	skModel::~skModel()
-	{
-		vkDestroyBuffer(m_skDevice.device(), m_vertexBuffer, nullptr);
-		vkFreeMemory(m_skDevice.device(), m_vertexBufferMemory, nullptr);
-
-		if (m_hasIndexBuffer)
-		{
-			vkDestroyBuffer(m_skDevice.device(), m_indexBuffer, nullptr);
-			vkFreeMemory(m_skDevice.device(), m_indexBufferMemory, nullptr);
-		}
-	}
+	skModel::~skModel() {}
 
 	void skModel::bind(VkCommandBuffer commandBuffer)
 	{
-		VkBuffer buffers[] = { m_vertexBuffer };
+		VkBuffer buffers[] = { m_vertexBuffer->getBuffer() };
 		VkDeviceSize offsets[] = { 0 };
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
 
@@ -56,7 +46,7 @@ namespace sk
 		{
 			// args: command buffer, index buffer(vkbuffer type), initial offset, vk type enum ---> this MUST match the type 
 			//    of the indices in the idx buffer VECTOR (not to be confused with the vkbuffer m_indexBuffer object, in this case uint32_t) 
-			vkCmdBindIndexBuffer(commandBuffer, m_indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+			vkCmdBindIndexBuffer(commandBuffer, m_indexBuffer->getBuffer(), 0, VK_INDEX_TYPE_UINT32);
 		}
 	}
 
@@ -79,7 +69,7 @@ namespace sk
 	{
 		Builder builder{};
 		builder.loadModel(filepath);
-		std::cout << "Vertex count: " << builder.vertices.size() << std::endl;
+		std::cout << "Vertex count for " << filepath << " : " << builder.vertices.size() << std::endl;
 		return std::make_unique<skModel>(device, builder);
 	}
 
@@ -91,39 +81,33 @@ namespace sk
 		m_vertexCount = static_cast<uint32_t>(vertices.size());
 		assert(m_vertexCount >= 3 && "Vertex count must be at least 3");
 		VkDeviceSize bufferSize = sizeof(vertices[0]) * m_vertexCount;
+		uint32_t vertexSize = sizeof(vertices[0]);
 
 		// staging (temp) buffer that will be used to 1) receive data from CPU and 2) transfer data to a more optimized gpu memory type
 		//  that can't normally receive data directly from CPU.
-		VkBuffer stagingBuffer;
-		VkDeviceMemory stagingBufferMemory;
-		// allocate memory in device (GPU)
-		m_skDevice.createBuffer(
-			bufferSize,
+		skBuffer stagingBuffer{
+			m_skDevice,
+			vertexSize,
+			m_vertexCount,
 			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-			stagingBuffer,
-			stagingBufferMemory);
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+		};
 
-		/* This step copies data from CPU to staging buffer in GPU */
-		// allocate and link a region in cpu memory to an existing region in gpu memory
-		void *data;
-		vkMapMemory(m_skDevice.device(), stagingBufferMemory, 0, bufferSize, 0, &data);
-		// *** this memcpy call flushes the same info that's copied to CPU memory, to the linked gpu memory ***
-		memcpy(data, vertices.data(), static_cast<size_t>(bufferSize));
-		// unmap (unlink) the cpu memory from gpu memory, the cpu memory will then be cleaned up.
-		vkUnmapMemory(m_skDevice.device(), stagingBufferMemory);
+		// Copy data from CPU to staging buffer in GPU
+		stagingBuffer.map();
+		stagingBuffer.writeToBuffer((void*)vertices.data());
 
-		m_skDevice.createBuffer(
-			bufferSize,
+		// Create vertex buffer (smart ptr)
+		m_vertexBuffer = std::make_unique<skBuffer>(
+			m_skDevice,
+			vertexSize,
+			m_vertexCount,
 			VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, // this gpu memory type is more optimized and efficient than used in previous tutorials
-			m_vertexBuffer,
-			m_vertexBufferMemory);
-
-		m_skDevice.copyBuffer(stagingBuffer, m_vertexBuffer, bufferSize);
-
-		vkDestroyBuffer(m_skDevice.device(), stagingBuffer, nullptr);
-		vkFreeMemory(m_skDevice.device(), stagingBufferMemory, nullptr);
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT // this gpu memory type is more optimized and efficient than used in previous tutorials
+			);
+		
+		// Copy contents from staging buffer to optimized device buffer
+		m_skDevice.copyBuffer(stagingBuffer.getBuffer(), m_vertexBuffer->getBuffer(), bufferSize);
 	}
 
 	/* see comment on createVertexBuffers function */
@@ -137,41 +121,33 @@ namespace sk
 
 		assert(m_indexCount >= 3 && "Vertex count must be at least 3");
 		VkDeviceSize bufferSize = sizeof(indices[0]) * m_indexCount;
-		
+		uint32_t indexSize = sizeof(indices[0]);
+
 		// staging (temp) buffer that will be used to 1) receive data from CPU and 2) transfer data to a more optimized gpu memory type
-		//  that can't normally receive data directly from CPU.
-		VkBuffer stagingBuffer;
-		VkDeviceMemory stagingBufferMemory;
-		// allocate memory in device (GPU)
-		m_skDevice.createBuffer(
-			bufferSize,
+		//  that can't normally receive data directly from CPU
+		skBuffer stagingBuffer{
+			m_skDevice,
+			indexSize,
+			m_indexCount,
 			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-			stagingBuffer,
-			stagingBufferMemory);
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+		};
+		
+		// Copy data from CPU to staging buffer in GPU
+		stagingBuffer.map();
+		stagingBuffer.writeToBuffer((void*)indices.data());
 
-		/* This step copies data from CPU to staging buffer in GPU */
-		// allocate and link a region in cpu memory to an existing region in gpu memory
-		void* data;
-		vkMapMemory(m_skDevice.device(), stagingBufferMemory, 0, bufferSize, 0, &data);
-		// *** this memcpy call flushes the same info that's copied to CPU memory, to the linked gpu memory ***
-		memcpy(data, indices.data(), static_cast<size_t>(bufferSize));
-		// unmap (unlink) the cpu memory from gpu memory, the cpu memory will then be cleaned up.
-		vkUnmapMemory(m_skDevice.device(), stagingBufferMemory);
-
-		m_skDevice.createBuffer(
-			bufferSize,
+		// Create index buffer (smart ptr)
+		m_indexBuffer = std::make_unique<skBuffer>(
+			m_skDevice,
+			indexSize,
+			m_indexCount,
 			VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, // this gpu memory type is more optimized and efficient than used in previous tutorials
-			m_indexBuffer,
-			m_indexBufferMemory);
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT // this gpu memory type is more optimized and efficient than used in previous tutorials
+		);
 
 		// copy staging buffer into optimized device buffer
-		m_skDevice.copyBuffer(stagingBuffer, m_indexBuffer, bufferSize);
-
-		// clean up staging buffer
-		vkDestroyBuffer(m_skDevice.device(), stagingBuffer, nullptr);
-		vkFreeMemory(m_skDevice.device(), stagingBufferMemory, nullptr);
+		m_skDevice.copyBuffer(stagingBuffer.getBuffer(), m_indexBuffer->getBuffer(), bufferSize);
 	}
 
 	std::vector<VkVertexInputBindingDescription> skModel::Vertex::getBindingDescriptions()

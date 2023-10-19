@@ -61,12 +61,12 @@ namespace sk
 			pipelineConfig);
 	}
 
-	void SimpleRenderSystem::renderGameObjects(VkCommandBuffer commandBuffer, std::vector<skGameObject> &gameObjects, const skCamera& camera)
+	void SimpleRenderSystem::renderGameObjects(FrameInfo &frameInfo, std::vector<skGameObject> &gameObjects)
 	{
 		// do not forget to bind the pipeline!
-		m_skPipeline->bind(commandBuffer);
+		m_skPipeline->bind(frameInfo.commandBuffer);
 
-		auto projectionView = camera.getProjection() * camera.getView(); // projection * view matrices
+		auto projectionView = frameInfo.camera.getProjection() * frameInfo.camera.getView(); // projection * view matrices
 
 		// update (akin to onUpdate function)
 		for (auto& obj : gameObjects) {
@@ -77,7 +77,7 @@ namespace sk
 			push.normalMatrix = obj.transform.normalMatrix(); // transformation of normal matrices when obj is transformed (requires diff procedure than transforming obj itself)
 
 			vkCmdPushConstants(
-				commandBuffer,
+				frameInfo.commandBuffer,
 				m_pipelineLayout,
 				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
 				0,
@@ -85,8 +85,8 @@ namespace sk
 				&push);
 
 			//bind model and draw
-			obj.model->bind(commandBuffer);
-			obj.model->draw(commandBuffer);
+			obj.model->bind(frameInfo.commandBuffer);
+			obj.model->draw(frameInfo.commandBuffer);
 		}
 	}
 

@@ -2,6 +2,7 @@
 #include "renderer/SimpleRenderSystem.h"
 #include "camera/skCamera.h"
 #include "controller/KeyboardMovementController.h"
+#include "model/skBuffer.h"
 
 // libs
 #define GLM_FORCE_RADIANS
@@ -17,6 +18,12 @@
 
 namespace sk
 {	
+	struct GlobalUbo
+	{
+		glm::mat4 projectionView{ 1.f };
+		glm::vec3 lightDirection = glm::normalize(glm::vec3{ 1.f, -3.f, -1.f });
+	};
+
 	AppManager::AppManager()
 	{
 		loadGameObjects();
@@ -26,6 +33,16 @@ namespace sk
 
 	void AppManager::run()
 	{
+		skBuffer globalUboBuffer{
+			m_skDevice,
+			sizeof(GlobalUbo),
+			skSwapChain::MAX_FRAMES_IN_FLIGHT,
+			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+			m_skDevice.properties.limits.minUniformBufferOffsetAlignment // since this uniform buffer will have multiple instances, we need to specify min offset alignment
+		};
+		globalUboBuffer.map(); // enables writing to this buffer's memory
+
 		SimpleRenderSystem simpleRenderSystem{ m_skDevice, m_skRenderer.getSwapChainRenderPass() };
 		skCamera camera{};
 		camera.setViewTarget(glm::vec3(-1.f, -2.f, 2.f), glm::vec3(0.f, 0.f, 2.5f));
@@ -54,12 +71,20 @@ namespace sk
 
 			if (auto commandBuffer = m_skRenderer.beginFrame()) // beginFrame() will return a nullptr if the swapchain needs to be created
 			{
-				/*
-				* beginFrame() and beginSwapChainRenderPass() aren't combined into a single function because this down the line this will help us
-				*  integrate multiple renderpasses for things such as reflections, shadows and post-processing effects.
-				*/
+				int frameIndex = m_skRenderer.getFrameIndex();
+				FrameInfo frameInfo{ frameIndex, frameTime, commandBuffer, camera };
+
+				// update
+				GlobalUbo ubo{};
+				ubo.projectionView = camera.getProjection() * camera.getView();
+				globalUboBuffer.writeToIndex(&ubo, frameIndex);
+				globalUboBuffer.flushIndex(frameIndex);
+
+				/* beginFrame() and beginSwapChainRenderPass() aren't combined into a single function because this down the line this will help us
+				 *  integrate multiple renderpasses for things such as reflections, shadows and post-processing effects. */
+				// render
 				m_skRenderer.beginSwapChainRenderPass(commandBuffer);
-				simpleRenderSystem.renderGameObjects(commandBuffer, m_gameObjects, camera);
+				simpleRenderSystem.renderGameObjects(frameInfo, m_gameObjects);
 				m_skRenderer.endSwapChainRenderPass(commandBuffer);
 				m_skRenderer.endFrame();
 			}
