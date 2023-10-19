@@ -186,26 +186,30 @@ namespace sk
 
 	std::vector<VkVertexInputAttributeDescription> skModel::Vertex::getAttributeDescriptions()
 	{
-		// attribute: position
-		std::vector<VkVertexInputAttributeDescription> attributeDescriptions(2);
+		
+		std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
+
+		// element components: binding, location (as in layout location, see shaders), format (vk format enum), offset (offset of attribute inside
+		//   the "Vertex" struct. names of these components correspond to fields inside the "Vertex" struct.
+		attributeDescriptions.push_back({ 0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, position) });
+		attributeDescriptions.push_back({ 1, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, color) });
+		attributeDescriptions.push_back({ 2, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, normal) });
+		attributeDescriptions.push_back({ 3, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, uv) });
+
+		/* More verbose description, see comments for understanding.
 		attributeDescriptions[0].binding = 0; // has to do with interleaving attributes in one buffer, or separate buffers for each attribute
 		attributeDescriptions[0].location = 0; // refers to layout location
 		attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
 		attributeDescriptions[0].offset = offsetof(Vertex, position); // offset from start of vertex data to attribute (stride is the byte size of a vertex basically, or byte distance to jump from one vertex to the next)
-
-		// attribute: color
-		attributeDescriptions[1].binding = 0; // binding remains as 0 here for color attribute, as we are interleaving attributes in one buffer
-		attributeDescriptions[1].location = 1; // make sure layout here matches with layout location in shader files
-		attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT; //r32g32b32 because of 3 components (vec3) as opposed to location's 2 components (vec2)
-		attributeDescriptions[1].offset = offsetof(Vertex, color); //This calculates byte offset. type as first argument and member name as second argument
+		*/
 
 		return attributeDescriptions;
 	}
 
 	void skModel::Builder::loadModel(const std::string& filepath)
 	{
-		tinyobj::attrib_t attrib;
-		std::vector<tinyobj::shape_t> shapes;
+		tinyobj::attrib_t attrib;					// stores positions, colors, normals & texture coordinates
+		std::vector<tinyobj::shape_t> shapes;		// stores indices
 		std::vector<tinyobj::material_t> materials;
 		std::string warn, err;
 
@@ -229,17 +233,11 @@ namespace sk
 						attrib.vertices[3 * index.vertex_index + 2]
 					};
 
-					auto colorIndex = 3 * index.vertex_index + 2;
-					if (colorIndex < attrib.colors.size()) {
-						vertex.color = {
-							attrib.colors[colorIndex - 2],
-							attrib.colors[colorIndex - 1],
-							attrib.colors[colorIndex - 0]
-						};
-					}
-					else {
-						vertex.color = { 1.f, 1.f, 1.f }; // set default color
-					}
+					vertex.color = {
+						attrib.colors[3 * index.vertex_index + 0],
+						attrib.colors[3 * index.vertex_index + 1],
+						attrib.colors[3 * index.vertex_index + 2]
+					};
 				}
 
 				if (index.normal_index >= 0)
@@ -260,7 +258,7 @@ namespace sk
 				}
 
 				if (uniqueVertices.count(vertex) == 0) {
-					uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size()); // clever way of determining index
+					uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size()); // clever way of determining index, size of vertices per iteration corresponds to unique index
 					vertices.push_back(vertex);
 				}
 				indices.push_back(uniqueVertices[vertex]);

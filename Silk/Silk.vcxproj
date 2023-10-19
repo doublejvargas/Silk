@@ -193,6 +193,7 @@
     <ClCompile Include="core\skDevice.cpp" />
     <ClCompile Include="core\skPipeline.cpp" />
     <ClCompile Include="core\skSwapChain.cpp" />
+    <ClCompile Include="skGameObject.cpp" />
     <ClCompile Include="window\skWindow.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -14,12 +14,8 @@
 namespace sk
 {
 	struct SimplePushConstantData {
-		glm::mat4 transform{ 1.f }; // initialized main diagonal to 1.0f, i.e., an identity matrix
-
-		// this is required by the SPIR-V explicit layout validation rules
-		// vec3s and vec4s must be aligned to a multiple of 4N where N is the size of the component literal (in this case, it is a scalar float -> N = 4 bytes)
-		//   therefore, vec2 -> 2N = 8 bytes and vec3 -> 4N = 16 bytes, thus the alignas(16)
-		alignas(16) glm::vec3 color;
+		glm::mat4 transform{ 1.f }; // Corresponds to projection * view * model [read right to left]. initialized main diagonal to 1.0f, i.e., an identity matrix	 
+		glm::mat4 normalMatrix{ 1.f }; // model transform only (?). corresponds to translate * rotate * scale [read right to left]
 	};
 
 	SimpleRenderSystem::SimpleRenderSystem(skDevice &device, VkRenderPass renderPass)
@@ -70,14 +66,15 @@ namespace sk
 		// do not forget to bind the pipeline!
 		m_skPipeline->bind(commandBuffer);
 
-		auto projectionView = camera.getProjection() * camera.getView();
+		auto projectionView = camera.getProjection() * camera.getView(); // projection * view matrices
 
 		// update (akin to onUpdate function)
 		for (auto& obj : gameObjects) {
-			// push constants (uniforms) before issuing draw call
+			// push constants before issuing draw call
 			SimplePushConstantData push{};
-			push.color = obj.color;
-			push.transform = projectionView * obj.transform.mat4(); // returns transformation of this object
+			auto modelMatrix = obj.transform.mat4();
+			push.transform = projectionView * modelMatrix; // returns transformation of this object ( projection * view * model)
+			push.normalMatrix = obj.transform.normalMatrix(); // transformation of normal matrices when obj is transformed (requires diff procedure than transforming obj itself)
 
 			vkCmdPushConstants(
 				commandBuffer,

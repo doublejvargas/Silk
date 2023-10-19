@@ -71,11 +71,18 @@ namespace sk
 	void AppManager::loadGameObjects()
 	{
 		std::shared_ptr<skModel> model = skModel::createModelFromFile(m_skDevice, "res\\models\\smooth_vase.obj");
-		auto gameObj = skGameObject::createGameObject();
-		gameObj.model = model;
-		gameObj.transform.translation = { .0f, .0f, 2.5f };
-		gameObj.transform.scale = glm::vec3(3.f);
-		m_gameObjects.push_back(std::move(gameObj));
+		auto smoothVase = skGameObject::createGameObject();
+		smoothVase.model = model;
+		smoothVase.transform.translation = { -.5f, .5f, 2.5f };
+		smoothVase.transform.scale = { 3.f, 1.5f, 3.f };
+		m_gameObjects.push_back(std::move(smoothVase));
+
+		model = skModel::createModelFromFile(m_skDevice, "res\\models\\flat_vase.obj");
+		auto flatVase = skGameObject::createGameObject();
+		flatVase.model = model;
+		flatVase.transform.translation = { .5f, .5f, 2.5f };
+		flatVase.transform.scale = { 3.f, 1.5f, 3.f };
+		m_gameObjects.push_back(std::move(flatVase));
 	}
 
 } // namespace sk

@@ -48,6 +48,9 @@
     <ClCompile Include="controller\KeyboardMovementController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="skGameObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="window\skWindow.h">
