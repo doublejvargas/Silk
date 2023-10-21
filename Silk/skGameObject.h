@@ -7,6 +7,7 @@
 
 // std
 #include <memory>
+#include <unordered_map>
 
 namespace sk
 {
@@ -30,6 +31,7 @@ namespace sk
 	{
 	public:
 		using id_t = unsigned int;
+		using Map = std::unordered_map<id_t, skGameObject>;
 
 		static skGameObject createGameObject()
 		{

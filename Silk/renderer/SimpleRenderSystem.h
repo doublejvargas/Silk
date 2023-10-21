@@ -23,7 +23,7 @@ namespace sk
 		SimpleRenderSystem(const SimpleRenderSystem&) = delete;
 		SimpleRenderSystem& operator=(const SimpleRenderSystem&) = delete;
 
-		void renderGameObjects(FrameInfo &frameInfo, std::vector<skGameObject> &gameObjects);
+		void renderGameObjects(FrameInfo &frameInfo);
 
 
 	private:

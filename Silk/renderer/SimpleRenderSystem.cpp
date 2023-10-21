@@ -63,7 +63,7 @@ namespace sk
 			pipelineConfig);
 	}
 
-	void SimpleRenderSystem::renderGameObjects(FrameInfo &frameInfo, std::vector<skGameObject> &gameObjects)
+	void SimpleRenderSystem::renderGameObjects(FrameInfo &frameInfo)
 	{
 		// do not forget to bind the pipeline!
 		m_skPipeline->bind(frameInfo.commandBuffer);
@@ -78,7 +78,10 @@ namespace sk
 		);
 
 		// update (akin to onUpdate function)
-		for (auto& obj : gameObjects) {
+		for (auto& kv : frameInfo.gameObjects) {
+			auto& obj = kv.second;
+			if (obj.model == nullptr) continue;
+
 			// push constants before issuing draw call
 			SimplePushConstantData push{};
 			push.modelMatrix = obj.transform.mat4(); // returns transformation of this object ( projection * view * model)

@@ -37,6 +37,6 @@ namespace sk
 		// note: order of declarations matters here
 		// memory is allocated for declared objects from top to bottom, memory is deallocated from bottom to top
 		std::unique_ptr<skDescriptorPool> m_globalPool{};
-		std::vector<skGameObject> m_gameObjects;
+		skGameObject::Map m_gameObjects;
 	};
 } // namespace sk

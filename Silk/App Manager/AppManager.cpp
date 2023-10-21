@@ -55,7 +55,7 @@ namespace sk
 
 		auto globalSetLayout =
 			sk::skDescriptorSetLayout::Builder(m_Device)
-			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
+			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
 			.build();
 
 		std::vector<VkDescriptorSet> globalDescriptorSets(skSwapChain::MAX_FRAMES_IN_FLIGHT);
@@ -97,7 +97,7 @@ namespace sk
 			if (auto commandBuffer = m_skRenderer.beginFrame()) // beginFrame() will return a nullptr if the swapchain needs to be created
 			{
 				int frameIndex = m_skRenderer.getFrameIndex();
-				FrameInfo frameInfo{ frameIndex, frameTime, commandBuffer, camera, globalDescriptorSets[frameIndex]};
+				FrameInfo frameInfo{ frameIndex, frameTime, commandBuffer, camera, globalDescriptorSets[frameIndex], m_gameObjects};
 
 				// update
 				GlobalUbo ubo{};
@@ -109,7 +109,7 @@ namespace sk
 				 *  integrate multiple renderpasses for things such as reflections, shadows and post-processing effects. */
 				// render
 				m_skRenderer.beginSwapChainRenderPass(commandBuffer);
-				simpleRenderSystem.renderGameObjects(frameInfo, m_gameObjects);
+				simpleRenderSystem.renderGameObjects(frameInfo);
 				m_skRenderer.endSwapChainRenderPass(commandBuffer);
 				m_skRenderer.endFrame();
 			}
@@ -125,21 +125,21 @@ namespace sk
 		flatVase.model = model;
 		flatVase.transform.translation = { -.5f, .5f, 0.f };
 		flatVase.transform.scale = { 3.f, 1.5f, 3.f };
-		m_gameObjects.push_back(std::move(flatVase));
+		m_gameObjects.emplace(flatVase.getId(), std::move(flatVase));
 		
 		model = skModel::createModelFromFile(m_Device, "res\\models\\smooth_vase.obj");
 		auto smoothVase = skGameObject::createGameObject();
 		smoothVase.model = model;
 		smoothVase.transform.translation = { .5f, .5f, 0.f };
 		smoothVase.transform.scale = { 3.f, 1.5f, 3.f };
-		m_gameObjects.push_back(std::move(smoothVase));
+		m_gameObjects.emplace(smoothVase.getId(), std::move(smoothVase));
 
 		model = skModel::createModelFromFile(m_Device, "res\\models\\quad.obj");
 		auto floor = skGameObject::createGameObject();
 		floor.model = model;
 		floor.transform.translation = { .0f, .5f, 0.f };
 		floor.transform.scale = { 3.f, 1.f, 3.f };
-		m_gameObjects.push_back(std::move(floor));
+		m_gameObjects.emplace(floor.getId(), std::move(floor));
 	}
 
 } // namespace sk
