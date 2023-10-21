@@ -46,7 +46,7 @@ namespace sk
 		void recreateSwapChain();
 
 		skWindow &m_skWindow;
-		skDevice &m_skDevice;
+		skDevice &m_Device;
 		std::unique_ptr<skSwapChain> m_skSwapChain;
 		std::vector<VkCommandBuffer> m_commandBuffers;
 

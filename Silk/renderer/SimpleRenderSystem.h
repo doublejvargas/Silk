@@ -16,7 +16,7 @@ namespace sk
 	class SimpleRenderSystem
 	{
 	public:
-		SimpleRenderSystem(skDevice &device, VkRenderPass renderpass);
+		SimpleRenderSystem(skDevice &device, VkRenderPass renderpass, VkDescriptorSetLayout globalSetLayout);
 		~SimpleRenderSystem();
 
 		// delete copy constructors because we're managing vulkan objects in this class
@@ -27,10 +27,10 @@ namespace sk
 
 
 	private:
-		void createPipelineLayout();
+		void createPipelineLayout(VkDescriptorSetLayout globalSetLayout);
 		void createPipeline(VkRenderPass renderPass);
 
-		skDevice &m_skDevice;
+		skDevice &m_Device;
 		std::unique_ptr<skPipeline> m_skPipeline;
 		VkPipelineLayout m_pipelineLayout;
 	};

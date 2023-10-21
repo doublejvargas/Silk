@@ -4,6 +4,7 @@
 #include "renderer/skRenderer.h"
 #include "core/skDevice.h"
 #include "skGameObject.h"
+#include "descriptor/skDescriptors.h"
 
 // std
 #include <memory>
@@ -30,9 +31,12 @@ namespace sk
 		void loadGameObjects();
 
 		skWindow m_skWindow{ WIDTH, HEIGHT, "Hello Silk!" };
-		skDevice m_skDevice{ m_skWindow };
-		skRenderer m_skRenderer{ m_skWindow, m_skDevice };
+		skDevice m_Device{ m_skWindow };
+		skRenderer m_skRenderer{ m_skWindow, m_Device };
 
+		// note: order of declarations matters here
+		// memory is allocated for declared objects from top to bottom, memory is deallocated from bottom to top
+		std::unique_ptr<skDescriptorPool> m_globalPool{};
 		std::vector<skGameObject> m_gameObjects;
 	};
 } // namespace sk

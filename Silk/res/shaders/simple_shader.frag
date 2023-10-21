@@ -8,7 +8,7 @@ layout (location = 0) out vec4 outColor;
 // the order of the fields MUST match the order of the struct we created (see SimplePushConstantData in SimpleRenderSystem.cpp)
 layout (push_constant) uniform Push
 { 
-	mat4 transform; // projection * view * model
+	mat4 modelMatrix;
 	mat4 normalMatrix;
 } push;
 

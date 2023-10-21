@@ -8,7 +8,7 @@
 namespace sk
 {
 	skRenderer::skRenderer(skWindow& window, skDevice& device)
-		: m_skWindow{ window }, m_skDevice{ device }
+		: m_skWindow{ window }, m_Device{ device }
 	{
 		recreateSwapChain();
 		createCommandBuffers();
@@ -29,14 +29,14 @@ namespace sk
 			glfwWaitEvents();
 		}
 
-		vkDeviceWaitIdle(m_skDevice.device());
+		vkDeviceWaitIdle(m_Device.device());
 
 		if (m_skSwapChain == nullptr)
-			m_skSwapChain = std::make_unique<skSwapChain>(m_skDevice, extent);
+			m_skSwapChain = std::make_unique<skSwapChain>(m_Device, extent);
 		else
 		{
 			std::shared_ptr<skSwapChain> oldSwapChain = std::move(m_skSwapChain);
-			m_skSwapChain = std::make_unique<skSwapChain>(m_skDevice, extent, oldSwapChain);
+			m_skSwapChain = std::make_unique<skSwapChain>(m_Device, extent, oldSwapChain);
 
 			if (!oldSwapChain->compareSwapChainFormats(*m_skSwapChain.get()))
 			{
@@ -57,10 +57,10 @@ namespace sk
 		// Primary command buffers can be submitted to a queue for execution, but can't be called by another command buffer.
 		// Secondary command buffers can't be submitted to a queue for execution, but can be called by another command buffer.
 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		allocInfo.commandPool = m_skDevice.getCommandPool();
+		allocInfo.commandPool = m_Device.getCommandPool();
 		allocInfo.commandBufferCount = static_cast<uint32_t>(m_commandBuffers.size());
 
-		if (vkAllocateCommandBuffers(m_skDevice.device(), &allocInfo, m_commandBuffers.data()) != VK_SUCCESS) {
+		if (vkAllocateCommandBuffers(m_Device.device(), &allocInfo, m_commandBuffers.data()) != VK_SUCCESS) {
 			throw std::runtime_error("Failed to allocate command buffers.\n");
 		}
 	}
@@ -68,8 +68,8 @@ namespace sk
 	void skRenderer::freeCommandBuffers()
 	{
 		vkFreeCommandBuffers(
-			m_skDevice.device(),
-			m_skDevice.getCommandPool(),
+			m_Device.device(),
+			m_Device.getCommandPool(),
 			static_cast<uint32_t>(m_commandBuffers.size()),
 			m_commandBuffers.data());
 

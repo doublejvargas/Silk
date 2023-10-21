@@ -28,7 +28,7 @@ namespace std
 namespace sk
 {
 	skModel::skModel(skDevice& device, const skModel::Builder &builder)
-		: m_skDevice(device)
+		: m_Device(device)
 	{
 		createVertexBuffers(builder.vertices);
 		createIndexBuffers(builder.indices);
@@ -62,7 +62,6 @@ namespace sk
 			// args: vkCmdDraw(command buffer, vertex count, instance count, first vertex, first instance)
 			vkCmdDraw(commandBuffer, m_vertexCount, 1, 0, 0);
 		}
-		
 	}
 
 	std::unique_ptr<skModel> skModel::createModelFromFile(skDevice& device, const std::string& filepath)
@@ -86,7 +85,7 @@ namespace sk
 		// staging (temp) buffer that will be used to 1) receive data from CPU and 2) transfer data to a more optimized gpu memory type
 		//  that can't normally receive data directly from CPU.
 		skBuffer stagingBuffer{
-			m_skDevice,
+			m_Device,
 			vertexSize,
 			m_vertexCount,
 			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
@@ -99,7 +98,7 @@ namespace sk
 
 		// Create vertex buffer (smart ptr)
 		m_vertexBuffer = std::make_unique<skBuffer>(
-			m_skDevice,
+			m_Device,
 			vertexSize,
 			m_vertexCount,
 			VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
@@ -107,7 +106,7 @@ namespace sk
 			);
 		
 		// Copy contents from staging buffer to optimized device buffer
-		m_skDevice.copyBuffer(stagingBuffer.getBuffer(), m_vertexBuffer->getBuffer(), bufferSize);
+		m_Device.copyBuffer(stagingBuffer.getBuffer(), m_vertexBuffer->getBuffer(), bufferSize);
 	}
 
 	/* see comment on createVertexBuffers function */
@@ -126,7 +125,7 @@ namespace sk
 		// staging (temp) buffer that will be used to 1) receive data from CPU and 2) transfer data to a more optimized gpu memory type
 		//  that can't normally receive data directly from CPU
 		skBuffer stagingBuffer{
-			m_skDevice,
+			m_Device,
 			indexSize,
 			m_indexCount,
 			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
@@ -139,7 +138,7 @@ namespace sk
 
 		// Create index buffer (smart ptr)
 		m_indexBuffer = std::make_unique<skBuffer>(
-			m_skDevice,
+			m_Device,
 			indexSize,
 			m_indexCount,
 			VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
@@ -147,7 +146,7 @@ namespace sk
 		);
 
 		// copy staging buffer into optimized device buffer
-		m_skDevice.copyBuffer(stagingBuffer.getBuffer(), m_indexBuffer->getBuffer(), bufferSize);
+		m_Device.copyBuffer(stagingBuffer.getBuffer(), m_indexBuffer->getBuffer(), bufferSize);
 	}
 
 	std::vector<VkVertexInputBindingDescription> skModel::Vertex::getBindingDescriptions()

@@ -59,8 +59,8 @@ namespace sk
 
 		// Potentially dangerous as could lead to a dangling pointer if device is destroyed before pipeline,
 		// however, relationship between Pipeline and device is aggregation, meaning that device is guaranteed to exist during lifetime of Pipeline
-		// i.e., m_skDevice will always outlive skPipeline object.
-		skDevice& m_skDevice;
+		// i.e., m_Device will always outlive skPipeline object.
+		skDevice& m_Device;
 		VkPipeline m_GraphicsPipeline;
 		VkShaderModule m_VertShaderModule;
 		VkShaderModule m_FragShaderModule;

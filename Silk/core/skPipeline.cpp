@@ -12,16 +12,16 @@ namespace sk
 		skDevice& device,
 		const std::string& vertFilePath,
 		const std::string& fragFilePath,
-		const PipelineConfigInfo& configInfo) : m_skDevice{device}
+		const PipelineConfigInfo& configInfo) : m_Device{device}
 	{
 		createGraphicsPipeline(vertFilePath, fragFilePath, configInfo);
 	}
 
 	skPipeline::~skPipeline()
 	{
-		vkDestroyShaderModule(m_skDevice.device(), m_VertShaderModule, nullptr);
-		vkDestroyShaderModule(m_skDevice.device(), m_FragShaderModule, nullptr);
-		vkDestroyPipeline(m_skDevice.device(), m_GraphicsPipeline, nullptr);
+		vkDestroyShaderModule(m_Device.device(), m_VertShaderModule, nullptr);
+		vkDestroyShaderModule(m_Device.device(), m_FragShaderModule, nullptr);
+		vkDestroyPipeline(m_Device.device(), m_GraphicsPipeline, nullptr);
 	}
 
 	std::vector<char> skPipeline::readFile(const std::string& filepath)
@@ -188,7 +188,7 @@ namespace sk
 		pipelineInfo.basePipelineIndex = -1;
 		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
-		if (vkCreateGraphicsPipelines(m_skDevice.device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_GraphicsPipeline) != VK_SUCCESS) {
+		if (vkCreateGraphicsPipelines(m_Device.device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_GraphicsPipeline) != VK_SUCCESS) {
 			throw std::runtime_error("Failed to create graphics pipeline object \n");
 		}
 
@@ -201,7 +201,7 @@ namespace sk
 		createInfo.codeSize = code.size();
 		createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
-		if (vkCreateShaderModule(m_skDevice.device(), &createInfo, nullptr, shaderModule) != VK_SUCCESS) {
+		if (vkCreateShaderModule(m_Device.device(), &createInfo, nullptr, shaderModule) != VK_SUCCESS) {
 			throw std::runtime_error("Failed to create Shader Module. \n");
 		}
 	}

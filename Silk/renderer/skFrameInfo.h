@@ -13,5 +13,6 @@ namespace sk
 		float frameTime;
 		VkCommandBuffer commandBuffer;
 		skCamera& camera;
+		VkDescriptorSet globalDescriptorSet;
 	};
 } // namespace sk

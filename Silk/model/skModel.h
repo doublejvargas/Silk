@@ -56,7 +56,7 @@ namespace sk
 		void createVertexBuffers(const std::vector<Vertex>& vertices);
 		void createIndexBuffers(const std::vector<uint32_t>& indices);
 
-		skDevice &m_skDevice;
+		skDevice &m_Device;
 
 		std::unique_ptr<skBuffer> m_vertexBuffer;
 		uint32_t m_vertexCount;
