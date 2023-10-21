@@ -20,12 +20,15 @@ namespace sk
 {	
 	struct GlobalUbo
 	{
-		alignas(16) glm::mat4 projectionView{ 1.f };
-		alignas(16) glm::vec3 lightDirection = glm::normalize(glm::vec3{ 1.f, -3.f, -1.f });
+		glm::mat4 projectionView{ 1.f };
+		glm::vec4 ambientLightColor{ 1.f, 1.f, 1.f, .02f }; // w is intensity
+		glm::vec4 lightPosition{ -1.f };
+		alignas(16) glm::vec4 lightColor{ 1.f };		// w is light intensity
 	};
 
 	AppManager::AppManager()
 	{
+		// I'm able to link function calls like this because each function/method returns a REFERENCE to the object.
 		m_globalPool = skDescriptorPool::Builder(m_Device)
 			.setMaxSets(skSwapChain::MAX_FRAMES_IN_FLIGHT)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, skSwapChain::MAX_FRAMES_IN_FLIGHT)
@@ -69,6 +72,7 @@ namespace sk
 		camera.setViewTarget(glm::vec3(-1.f, -2.f, 2.f), glm::vec3(0.f, 0.f, 2.5f));
 
 		auto viewerObject = skGameObject::createGameObject();
+		viewerObject.transform.translation.z = -2.5f;
 		KeyboardMovementController cameraController{};
 
 		auto currentTime = std::chrono::high_resolution_clock::now();
@@ -88,7 +92,7 @@ namespace sk
 			camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
 
 			float aspect = m_skRenderer.getAspectRatio();
-			camera.setPerspectiveProjection(glm::radians(50.f), aspect, .1f, 10.f);
+			camera.setPerspectiveProjection(glm::radians(50.f), aspect, .1f, 100.f);
 
 			if (auto commandBuffer = m_skRenderer.beginFrame()) // beginFrame() will return a nullptr if the swapchain needs to be created
 			{
@@ -116,19 +120,26 @@ namespace sk
 
 	void AppManager::loadGameObjects()
 	{
-		std::shared_ptr<skModel> model = skModel::createModelFromFile(m_Device, "res\\models\\smooth_vase.obj");
+		std::shared_ptr<skModel> model = skModel::createModelFromFile(m_Device, "res\\models\\flat_vase.obj");
+		auto flatVase = skGameObject::createGameObject();
+		flatVase.model = model;
+		flatVase.transform.translation = { -.5f, .5f, 0.f };
+		flatVase.transform.scale = { 3.f, 1.5f, 3.f };
+		m_gameObjects.push_back(std::move(flatVase));
+		
+		model = skModel::createModelFromFile(m_Device, "res\\models\\smooth_vase.obj");
 		auto smoothVase = skGameObject::createGameObject();
 		smoothVase.model = model;
-		smoothVase.transform.translation = { -.5f, .5f, 2.5f };
+		smoothVase.transform.translation = { .5f, .5f, 0.f };
 		smoothVase.transform.scale = { 3.f, 1.5f, 3.f };
 		m_gameObjects.push_back(std::move(smoothVase));
 
-		model = skModel::createModelFromFile(m_Device, "res\\models\\flat_vase.obj");
-		auto flatVase = skGameObject::createGameObject();
-		flatVase.model = model;
-		flatVase.transform.translation = { .5f, .5f, 2.5f };
-		flatVase.transform.scale = { 3.f, 1.5f, 3.f };
-		m_gameObjects.push_back(std::move(flatVase));
+		model = skModel::createModelFromFile(m_Device, "res\\models\\quad.obj");
+		auto floor = skGameObject::createGameObject();
+		floor.model = model;
+		floor.transform.translation = { .0f, .5f, 0.f };
+		floor.transform.scale = { 3.f, 1.f, 3.f };
+		m_gameObjects.push_back(std::move(floor));
 	}
 
 } // namespace sk
