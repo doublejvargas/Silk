@@ -12,7 +12,8 @@ layout(location = 2) out vec3 o_fragNormalWorld;
 
 layout(set = 0, binding = 0) uniform GlobalUbo
 {
-	mat4 projectionViewMatrix;
+	mat4 projection;
+	mat4 view;
 	vec4 ambientLightColor; // w is intensity
 	vec3 lightPosition;
 	vec4 lightColor;
@@ -29,7 +30,7 @@ layout (push_constant) uniform Push
 void main()
 {
 	vec4 positionWorld = push.modelMatrix * vec4(a_Position, 1.0);
-	gl_Position = ubo.projectionViewMatrix * positionWorld;
+	gl_Position = ubo.projection * ubo.view * positionWorld;
 	// temporary: this is only correct in certain situations!
 	// mat3(push.modelMatrix) converts modelMatrix from a mat4 to a mat3 by truncating last column and row.
 	o_fragNormalWorld = normalize(mat3(push.normalMatrix) * a_Normal);
